@@ -24,6 +24,15 @@ public class AuthController {
         this.authService = authService;
         this.userRepository = userRepository;
     }
+    @PostMapping("/verify")
+    public ResponseEntity<?> verifyUser(@RequestParam String email, @RequestParam String code) {
+        try {
+            authService.verifyUser(email, code);
+            return ResponseEntity.ok("Verification successful! You can now login.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) { // Return type is generic <?> or <Map>

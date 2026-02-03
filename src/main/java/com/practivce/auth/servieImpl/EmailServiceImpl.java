@@ -5,21 +5,19 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import com.practivce.auth.service.EmailService;
-
 @Service
-public class EmailServiceImpl implements EmailService {
-	@Autowired
-	private JavaMailSender mailSender;
+public class EmailServiceImpl {
 
-	@Override
-	public void sendEmail(String[] to, String subject, String text) {
-		SimpleMailMessage message = new SimpleMailMessage();
-		message.setTo(to);
-		message.setSubject(subject);
-		message.setText(text);
-		// Spring will automatically use spring.mail.username as sender
-		mailSender.send(message);
-		System.out.println("Email sent to " + to);
-	}
+    @Autowired
+    private JavaMailSender mailSender;
+
+    public void sendVerificationEmail(String toEmail, String code) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("your-email@gmail.com");
+        message.setTo(toEmail);
+        message.setSubject("Your GameFi Verification Code");
+        message.setText("Hello! \n\nYour verification code is: " + code + "\n\nPlease enter this to complete your registration.");
+        
+        mailSender.send(message);
+    }
 }
