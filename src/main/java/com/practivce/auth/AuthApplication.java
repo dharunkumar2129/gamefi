@@ -13,6 +13,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 public class AuthApplication {
 
     public static void main(String[] args) {
+    	
+    	System.setProperty("java.net.preferIPv4Stack", "true");
         SpringApplication.run(AuthApplication.class, args);
     }
 }
