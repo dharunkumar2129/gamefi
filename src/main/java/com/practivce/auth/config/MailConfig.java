@@ -21,20 +21,23 @@ public class MailConfig {
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         
-        // FORCE PORT 465 (SSL) - This is the "Nuclear Option" for cloud servers
+        // We use Port 587 (TLS) which is standard for cloud apps
         mailSender.setHost("smtp.gmail.com");
-        mailSender.setPort(465);
+        mailSender.setPort(587);
         mailSender.setUsername(username);
         mailSender.setPassword(password);
 
         Properties props = mailSender.getJavaMailProperties();
-        props.put("mail.transport.protocol", "smtps"); // Note the 's' at the end
-        props.put("mail.smtps.auth", "true");
-        props.put("mail.smtps.starttls.enable", "true");
-        props.put("mail.smtps.timeout", "20000"); // 20 seconds
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.starttls.required", "true");
         
-        // Debugging: This will show the exact handshake in the logs
-        props.put("mail.debug", "true"); 
+        // Fix for "Angus Mail" hanging on cloud servers
+        props.put("mail.smtp.localhost", "127.0.0.1"); 
+        
+        // Debugging
+        props.put("mail.debug", "true");
 
         return mailSender;
     }
