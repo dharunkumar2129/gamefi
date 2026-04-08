@@ -12,12 +12,16 @@ public class EmailService {
     private JavaMailSender mailSender;
 
     public void sendVerificationEmail(String toEmail, String code) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("dharunkumar2129@gmail.com"); // YOUR EMAIL HERE
-        message.setTo(toEmail);
-        message.setSubject("GameFi Email Verification");
-        message.setText("Your verification code is: " + code);
-        
-        mailSender.send(message);
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom("your_email@gmail.com");
+            message.setTo(toEmail);
+            message.setSubject("Email Verification Code");
+            message.setText("Your OTP is: " + code + "\n\nValid for 5 minutes.");
+
+            mailSender.send(message);
+        } catch (Exception e) {
+            throw new RuntimeException("Email sending failed: " + e.getMessage());
+        }
     }
 }

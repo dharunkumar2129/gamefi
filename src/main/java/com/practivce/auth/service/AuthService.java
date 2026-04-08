@@ -53,11 +53,9 @@ public class AuthService {
 
     public String login(LoginRequest request) {
         authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                request.getEmail(),
-                request.getPassword()
-            )
-        );
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()));
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Invalid credentials"));
@@ -72,43 +70,41 @@ public class AuthService {
 
     @Transactional
     public String register(RegisterRequest request) {
-        // 1. Check if Email Exists
+
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
 
-        // 2. Check if Username Exists (Prevent duplicates)
         if (userRepository.existsByUsername(request.getUsername())) {
-             throw new RuntimeException("Username already taken");
+            throw new RuntimeException("Username already taken");
         }
 
-        // 3. Check if Role Exists
         Role userRole = roleRepository.findByName("ROLE_STUDENT")
-                .orElseThrow(() -> new RuntimeException("Error: Role 'ROLE_STUDENT' not found."));
+                .orElseThrow(() -> new RuntimeException("Role not found"));
 
-        // 4. Create the User Object
         User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRoles(Set.of(userRole));
-        
-        // Game defaults
-        user.setXp(0L); 
-        user.setLevel(1);
-        
-        // --- OTP GENERATION ---
-        String randomCode = String.valueOf(new Random().nextInt(900000) + 100000); // Generates 100000-999999
-        user.setVerificationCode(randomCode);
-        user.setEnabled(false); // <--- CRITICAL: User is disabled until they verify!
 
-        // 5. Save User (Without Leaderboard yet)
+        user.setXp(0L);
+        user.setLevel(1);
+
+        // OTP
+        String otp = String.valueOf(100000 + new Random().nextInt(900000));
+        user.setVerificationCode(otp);
+        user.setEnabled(false);
+
         userRepository.save(user);
 
-        // 6. Send Email
-        emailService.sendVerificationEmail(user.getEmail(), randomCode);
+        try {
+            emailService.sendVerificationEmail(user.getEmail(), otp);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to send email: " + e.getMessage());
+        }
 
-        return "Verification code sent to email: " + request.getEmail();
+        return "OTP sent to email. Please verify.";
     }
 
     @Transactional
