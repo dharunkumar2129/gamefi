@@ -102,11 +102,7 @@ public class AuthService {
 
         userRepository.save(user);
 
-        try {
-            emailService.sendVerificationEmail(user.getEmail(), otp);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to send email: " + e.getMessage());
-        }
+        emailService.sendVerificationEmail(user.getEmail(), otp);
 
         return "OTP sent to email. Please verify.";
     }

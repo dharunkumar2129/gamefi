@@ -21,8 +21,12 @@ public class RegisterController {
 	}
 	
 	@PostMapping("/register")
-	public ResponseEntity<String> register(@RequestBody RegisterRequest request){
-		authService.register(request);
-		return ResponseEntity.ok("User Registered success");
+	public ResponseEntity<?> register(@RequestBody RegisterRequest request){
+		try {
+			authService.register(request);
+			return ResponseEntity.ok("User Registered success");
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+		}
 	}
 }

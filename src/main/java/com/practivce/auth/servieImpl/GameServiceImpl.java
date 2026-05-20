@@ -70,13 +70,25 @@ public class GameServiceImpl implements GameService {
 
         // 5. Update Leaderboard (Only if passed and not solved before)
         if (!alreadySolved) {
-            Leaderboard lb = leaderboardRepository.findById(user.getId()).orElse(new Leaderboard());
+            Leaderboard lb = leaderboardRepository.findById(user.getId()).orElseGet(() -> {
+                Leaderboard newLb = new Leaderboard();
+                newLb.setUser(user);
+                newLb.setTotalScore(0L);
+                newLb.setProblemsSolved(0);
+                return newLb;
+            });
+            if (lb.getTotalScore() == null) {
+                lb.setTotalScore(0L);
+            }
             lb.setUser(user);
             lb.setTotalScore(lb.getTotalScore() + problem.getXpReward());
             lb.setProblemsSolved(lb.getProblemsSolved() + 1);
             leaderboardRepository.save(lb);
 
             // Also update User entity stats
+            if (user.getXp() == null) {
+                user.setXp(0L);
+            }
             user.setXp(user.getXp() + problem.getXpReward());
             userRepository.save(user);
         }
