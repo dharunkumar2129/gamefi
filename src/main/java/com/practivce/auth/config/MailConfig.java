@@ -33,6 +33,11 @@ public class MailConfig {
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.starttls.required", "true");
         
+        // Timeouts to prevent hanging (5 seconds)
+        props.put("mail.smtp.connectiontimeout", "5000");
+        props.put("mail.smtp.timeout", "5000");
+        props.put("mail.smtp.writetimeout", "5000");
+        
         // Fix for "Angus Mail" hanging on cloud servers
         props.put("mail.smtp.localhost", "127.0.0.1"); 
         

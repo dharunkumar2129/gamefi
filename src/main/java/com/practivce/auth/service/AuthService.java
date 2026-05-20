@@ -80,7 +80,11 @@ public class AuthService {
         }
 
         Role userRole = roleRepository.findByName("ROLE_STUDENT")
-                .orElseThrow(() -> new RuntimeException("Role not found"));
+                .orElseGet(() -> {
+                    Role role = new Role();
+                    role.setName("ROLE_STUDENT");
+                    return roleRepository.save(role);
+                });
 
         User user = new User();
         user.setUsername(request.getUsername());

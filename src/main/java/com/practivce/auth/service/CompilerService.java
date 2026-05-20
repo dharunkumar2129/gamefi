@@ -1,8 +1,5 @@
 package com.practivce.auth.service;
 
-
-import lombok.Builder;
-import lombok.Data;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import java.util.Collections;
@@ -19,22 +16,22 @@ public class CompilerService {
 
         try {
             // 1. Prepare the Request Body
-            PistonRequest request = PistonRequest.builder()
-                    .language(language) // e.g. "java"
-                    .version("15.0.2")  // Piston version
-                    .files(Collections.singletonList(new PistonFile("Main.java", code)))
-                    .stdin(input)       // Inject hidden test case input
-                    .build();
+            PistonRequest request = new PistonRequest(
+                    language,
+                    "15.0.2",
+                    Collections.singletonList(new PistonFile("Main.java", code)),
+                    input
+            );
 
             // 2. Send POST Request
             PistonResponse response = restTemplate.postForObject(PISTON_URL, request, PistonResponse.class);
 
             // 3. Handle Result
-            if (response != null && response.run != null) {
-                if (response.run.code != 0) {
-                    return "ERROR:\n" + response.run.stderr; // Compilation failed
+            if (response != null && response.getRun() != null) {
+                if (response.getRun().getCode() != 0) {
+                    return "ERROR:\n" + response.getRun().getStderr(); // Compilation failed
                 }
-                return response.run.stdout.trim(); // Success output
+                return response.getRun().getStdout().trim(); // Success output
             }
             return "Error: No response from compiler.";
 
@@ -44,28 +41,75 @@ public class CompilerService {
     }
 
     // --- Internal DTOs for Piston API ---
-    @Data @Builder
     static class PistonRequest {
-        public String language;
-        public String version;
-        public List<PistonFile> files;
-        public String stdin;
+        private String language;
+        private String version;
+        private List<PistonFile> files;
+        private String stdin;
+
+        public PistonRequest() {}
+
+        public PistonRequest(String language, String version, List<PistonFile> files, String stdin) {
+            this.language = language;
+            this.version = version;
+            this.files = files;
+            this.stdin = stdin;
+        }
+
+        public String getLanguage() { return language; }
+        public void setLanguage(String language) { this.language = language; }
+
+        public String getVersion() { return version; }
+        public void setVersion(String version) { this.version = version; }
+
+        public List<PistonFile> getFiles() { return files; }
+        public void setFiles(List<PistonFile> files) { this.files = files; }
+
+        public String getStdin() { return stdin; }
+        public void setStdin(String stdin) { this.stdin = stdin; }
     }
 
-    @Data
     static class PistonFile {
-        public String name;
-        public String content;
-        public PistonFile(String name, String content) { this.name = name; this.content = content; }
+        private String name;
+        private String content;
+
+        public PistonFile() {}
+
+        public PistonFile(String name, String content) {
+            this.name = name;
+            this.content = content;
+        }
+
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+
+        public String getContent() { return content; }
+        public void setContent(String content) { this.content = content; }
     }
 
-    @Data
-    static class PistonResponse { public RunResult run; }
+    static class PistonResponse {
+        private RunResult run;
 
-    @Data
+        public PistonResponse() {}
+
+        public RunResult getRun() { return run; }
+        public void setRun(RunResult run) { this.run = run; }
+    }
+
     static class RunResult {
-        public String stdout;
-        public String stderr;
-        public int code;
+        private String stdout;
+        private String stderr;
+        private int code;
+
+        public RunResult() {}
+
+        public String getStdout() { return stdout; }
+        public void setStdout(String stdout) { this.stdout = stdout; }
+
+        public String getStderr() { return stderr; }
+        public void setStderr(String stderr) { this.stderr = stderr; }
+
+        public int getCode() { return code; }
+        public void setCode(int code) { this.code = code; }
     }
 }

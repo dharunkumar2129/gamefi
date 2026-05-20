@@ -26,7 +26,7 @@ import com.practivce.auth.repository.UserRepository;
 		private UserRepository userRepository;
 		
 		
-		@PreAuthorize("hasAuthority('ROLE_USER')")
+		@PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_STUDENT')")
 		@GetMapping("/users")
 		public List<User> getUsers() {
 		    return userRepository.findAll();

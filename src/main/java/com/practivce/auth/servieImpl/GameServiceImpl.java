@@ -49,6 +49,13 @@ public class GameServiceImpl implements GameService {
         // 3. Compare Output
         boolean passed = actualOutput.equals(problem.getExpectedOutput().trim());
 
+        // Check if user already solved it BEFORE saving the new submission
+        boolean alreadySolved = false;
+        if (passed) {
+            alreadySolved = submissionRepository.existsByUserIdAndProblemIdAndStatus(
+                    user.getId(), problem.getId(), SubmissionStatus.PASSED);
+        }
+
         // 4. Save Submission History
         Submissions submission = new Submissions();
         submission.setUser(user);
@@ -62,24 +69,17 @@ public class GameServiceImpl implements GameService {
         }
 
         // 5. Update Leaderboard (Only if passed and not solved before)
-        boolean alreadySolved = submissionRepository.existsByUserIdAndProblemIdAndStatus(
-                user.getId(), problem.getId(), SubmissionStatus.PASSED);
+        if (!alreadySolved) {
+            Leaderboard lb = leaderboardRepository.findById(user.getId()).orElse(new Leaderboard());
+            lb.setUser(user);
+            lb.setTotalScore(lb.getTotalScore() + problem.getXpReward());
+            lb.setProblemsSolved(lb.getProblemsSolved() + 1);
+            leaderboardRepository.save(lb);
 
-        // Since we JUST saved a passed submission above, 'alreadySolved' might be true now.
-        // We check if the count is exactly 1 (meaning this is the first time).
-        long passedCount = submissionRepository.countByUserIdAndStatus(user.getId(), SubmissionStatus.PASSED);
-        
-        // Simple Logic: If they passed, update score. 
-        // (In a real app, ensure you don't give double XP).
-        Leaderboard lb = leaderboardRepository.findById(user.getId()).orElse(new Leaderboard());
-        lb.setUser(user);
-        lb.setTotalScore(lb.getTotalScore() + problem.getXpReward());
-        lb.setProblemsSolved(lb.getProblemsSolved() + 1);
-        leaderboardRepository.save(lb);
-
-        // Also update User entity stats
-        user.setXp(user.getXp() + problem.getXpReward());
-        userRepository.save(user);
+            // Also update User entity stats
+            user.setXp(user.getXp() + problem.getXpReward());
+            userRepository.save(user);
+        }
 
         return "SUCCESS";
     }

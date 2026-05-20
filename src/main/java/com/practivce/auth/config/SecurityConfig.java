@@ -41,7 +41,7 @@ public class SecurityConfig {
             // 4. Define Access Rules
             .authorizeHttpRequests(auth -> auth
                 // Public Endpoints
-                .requestMatchers("/auth/login","/auth/register").permitAll()
+                .requestMatchers("/auth/login", "/auth/register", "/auth/verify", "/health").permitAll()
                 .requestMatchers("/error").permitAll()
 
                 // 🔓 UNCOMMENT THIS LINE if you want to test submissions without login:
