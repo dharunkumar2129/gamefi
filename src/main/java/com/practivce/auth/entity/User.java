@@ -14,8 +14,6 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "verification_code")
-    private String verificationCode;
 
     // --- AUTH FIELDS (Existing) ---
     @Column(unique = true, nullable = false)
@@ -78,8 +76,6 @@ public class User {
     public Long getXp() { return xp; }
     public void setXp(Long xp) { this.xp = xp; }
 
-    public String getVerificationCode() { return verificationCode; }
-    public void setVerificationCode(String verificationCode) { this.verificationCode = verificationCode; }
     
     public int getLevel() { return level; }
     public void setLevel(int level) { this.level = level; }

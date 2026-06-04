@@ -95,41 +95,22 @@ public class AuthService {
         user.setXp(0L);
         user.setLevel(1);
 
-        // OTP
-        String otp = String.valueOf(100000 + new Random().nextInt(900000));
-        user.setVerificationCode(otp);
-        user.setEnabled(false);
+        user.setEnabled(true);
 
         userRepository.save(user);
 
-        emailService.sendVerificationEmail(user.getEmail(), otp);
+        // Seed Leaderboard entry immediately upon registration
+        Leaderboard lb = new Leaderboard();
+        lb.setUser(user);
+        lb.setTotalScore(0L);
+        lb.setProblemsSolved(0);
+        leaderboardRepository.save(lb);
 
-        return "OTP sent to email. Please verify.";
+        return "User Registered successfully";
     }
 
     @Transactional
     public void verifyUser(String email, String code) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (user.isEnabled()) {
-            throw new RuntimeException("User is already verified.");
-        }
-
-        if (user.getVerificationCode() != null && user.getVerificationCode().equals(code)) {
-            // 1. Enable the User
-            user.setEnabled(true);
-            user.setVerificationCode(null); // Clear the code so it can't be reused
-            userRepository.save(user);
-
-            // 2. Create Leaderboard Entry (Only now!)
-            Leaderboard lb = new Leaderboard();
-            lb.setUser(user);
-            lb.setTotalScore(0L);
-            lb.setProblemsSolved(0);
-            leaderboardRepository.save(lb);
-        } else {
-            throw new RuntimeException("Invalid Verification Code");
-        }
+        // Users are verified automatically during registration. Keep this method as a no-op stub for backward compatibility.
     }
 }
